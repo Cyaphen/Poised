@@ -1,8 +1,10 @@
 /** Project management program for a structural engineering firm
-*to manage their construction projects
+*to manage their construction projects.
+*Invoice number needs to be the same as the project number,
+*if the project number is 22 then the invoice number for that project needs to be 22.
 *<p>
-*@author jpgeyer
-*@version 1
+*@author JP Geyer
+*@version 2
 */
 
 // Importing modules
@@ -10,22 +12,32 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.io.*;
+import java.util.Date;
+import java.sql.*;
+
+
 
 public class Poised {
 
 	public static void main(String[] args) {
 		
+		try {
+			
+			// Establishing connection with server and database
+			Connection connection = DriverManager.getConnection(
+					"jdbc:mysql://localhost:3306/poisedpms?useSSL = false",
+					"otheruser",
+					"swordfish"
+					);
+		
+			// Statement variable with direct access to database for running queries
+			Statement statement = connection.createStatement();		
+		
 		// Initializing scanner and file writer
 		Scanner keyboard = new Scanner(System.in);
-		FileWriter open = null; // New Projects file
-		PrintWriter writer = null; // New Projects file, written in easy to read format for user
-		FileWriter open1 = null; // Search Projects file
-		PrintWriter writer1 = null;// Search Projects file, written on one line for developer use
-		
 		
 		// Formatting date
-		DateFormat formattingDate = new SimpleDateFormat("dd-MM-yyyy"); 
+		DateFormat formattingDate = new SimpleDateFormat("yyyy-MM-dd"); 
 		Date today = new Date();
 		
 		// Variables for while loop menu selection		
@@ -36,8 +48,8 @@ public class Poised {
 		System.out.println("Welcome to Poised Project Management System.");
 		System.out.println();
 		
-		try {
-			
+		try {		
+						
 			while (menuChoice != -1) {
 			
 				// Displaying menu information	
@@ -52,8 +64,6 @@ public class Poised {
 				  + "\n-1 - To exit."
 				  + "\n:");
 		
-			
-				
 			menuChoice = keyboard.nextInt(); //scanner
 			// Load new project section
 			
@@ -83,6 +93,15 @@ public class Poised {
 					// Assigning new customer object
 					Customer customerNew = new Customer(custName, custSurname, custEmail, custTelNumber, custStreetNumber,
 							custStreetName);
+					// Creating string variable to load into database
+					String custAddress;
+					String custNumberStreet = String.valueOf(custStreetNumber); // Converting integer value to string
+					custAddress = custNumberStreet + " " + custStreetName;
+
+					// SQL statement to perform info update from user on database
+					String custData = String.format("INSERT INTO customer VALUES('%s', '%s', '%s', '%s', '%s)", custName, custSurname, custEmail,
+							custTelNumber, custAddress);
+					statement.executeUpdate(custData); // Updating database
 								
 					System.out.println("Please enter the name of the building contractor: ");
 					String contractorName = keyboard.next().trim();
@@ -105,7 +124,18 @@ public class Poised {
 					// assigning new contractor object
 					Contractor contractorNew = new Contractor(contractorName, contractorSurname, contractorEmail, contractorTelNumber,
 							contractorStreetNumber, contractorStreetName);
-						
+					
+					// Creating variable for address to load into database 
+					String contAddress;
+					String contAddressNumber = String.valueOf(contractorStreetNumber); // converting integer into string value
+					contAddress = contAddressNumber + " " + contractorStreetName;
+
+					// SQL statement to perform info update from user on database
+					String contData = String.format("INSERT INTO contractor(cont_name, cont_surname, cont_email, cont_tel, cont_address) VALUES('%s',"
+							+ "'%s', '%s', '%s', '%s)", contractorName, contractorSurname, 
+							contractorEmail, contractorTelNumber, contAddress);
+					statement.executeUpdate(contData); // Updating database
+					
 					System.out.println("Please enter the name of the architect: ");
 					String architectName = keyboard.next().trim();
 										
@@ -127,7 +157,18 @@ public class Poised {
 					// Assigning new architect object
 					Architect architectNew = new Architect(architectName, architectSurname, architectEmail, architectTelNumber,
 							architectStreetNumber, architectStreetName);
-						
+					
+					// Creating variable for address to load into database 
+					String archAddress;
+					String archAddressNumber = String.valueOf(architectStreetNumber); // converting integer into string value
+					archAddress = archAddressNumber + " " + architectStreetName;
+
+					// SQL statement to perform info update from user on database
+					String archData = String.format("INSERT INTO architect VALUES('%s', '%s', '%s', '%s', '%s)", architectName, architectSurname, 
+							architectEmail, architectTelNumber, archAddress);
+					statement.executeUpdate(archData); // Updating database
+					
+					
 					System.out.println("Please enter the project number: ");
 					int projectNumber = keyboard.nextInt();
 										
@@ -153,7 +194,7 @@ public class Poised {
 					long ammountPaidToDate = keyboard.nextLong();
 										
 					keyboard.nextLine(); // Allows scanner to stop and wait for user input
-					System.out.println("Please enter the deadline for the project (eg.dd-mm-yyyy): ");
+					System.out.println("Please enter the deadline for the project (eg.yyyy-mm-dd): ");
 					String deadline = keyboard.nextLine();
 										
 					// Creating project name
@@ -161,32 +202,28 @@ public class Poised {
 					
 					String toBeCompleted = "To be completed";
 					
+					// Creating variable for address to load into database 
+					String projAddress;
+					String projAddressNumber = String.valueOf(projectStreetNumber); // converting integer into string value
+					projAddress = projAddressNumber + " " + projectStreetName;
+
+					// SQL statement to perform info update from user on database
+					String projAddressData = String.format("INSERT INTO proj_address VALUES('%s', '%s', '%s', '%s', '%s')", projectNumber, erfNumber, projAddress, 
+							projectSuburbName, buildingType);
+					statement.executeUpdate(projAddressData); // Updating database
+					
+					// SQL statement to perform info update from user on database
+					String projInfoData = String.format("INSERT INTO proj_info VALUES('%s', '%s', '%s', '%s', %s, %s, %s)", projectNumber, projectFee, 
+							deadline, architectName, contractorName, projectName, custSurname);
+					statement.executeUpdate(projInfoData); // Updating database
+					
+					String invoiceData = String.format("INSERT INTO invoice VALUES('%s', '%s', '%s', '%s')", projectNumber, erfNumber, toBeCompleted, ammountPaidToDate);
+					statement.executeUpdate(invoiceData); // Updating database
+					
 					// Assigning new projects object
 					Projects projectNew = new Projects(projectNumber, projectName, buildingType, projectStreetNumber, projectStreetName,
 							projectSuburbName, erfNumber, projectFee, ammountPaidToDate, deadline, architectNew, contractorNew,
 					  		customerNew, toBeCompleted);
-					
-					
-					open1 = new FileWriter("SearchProjects.txt", true);
-					writer1 = new PrintWriter(open1);
-					
-					String projDetails = (custName + ", " + custSurname + ", " + custEmail + ", " + custTelNumber
-							+ ", " + custStreetNumber + ", " + custStreetName + ", " + contractorName + ", " + contractorSurname
-							+ ", " + contractorEmail + ", " + contractorTelNumber + ", " + contractorStreetNumber 
-							+ ", " + contractorStreetName + ", " + architectName + ", " + architectSurname + ", " + architectEmail
-							+ ", " + architectTelNumber + ", " + architectStreetNumber + ", " + architectStreetName
-							+ ", " + projectNumber + ", " + buildingType + ", " + projectStreetNumber + ", " + projectStreetName
-							+ ", " + projectSuburbName + ", " + erfNumber + ", " + projectFee + ", " + ammountPaidToDate
-							+ ", " + deadline + ", " + projectName + ", " + toBeCompleted + "\n");
-					
-					writer1.write(projDetails);
-					writer1.flush();
-					
-					open = new FileWriter("NewProjects.txt", true);
-					writer = new PrintWriter(open);
-									
-					writer.write(projectNew.toString());
-					writer.flush();
 					
 					// Displaying created project to user with 'toString' method
 					System.out.println(projectNew.toString());
@@ -197,18 +234,14 @@ public class Poised {
 					System.out.println("Error, please try again.");
 					
 				}
-				
-				catch (IOException e) {
-				
-					System.out.println("File not found.");
-					e.printStackTrace();
-				}
 			}
 		
 		// Update project information menu
 		else if (menuChoice == 2) {
 				
 			ArrayList<Projects> listOfProjects = Projects.getProjectsArrayList(); 
+			
+			System.out.println(listOfProjects);
 			
 			// While loop menu for user to select what information they want to update
 			while (choice != -1) {
@@ -234,13 +267,17 @@ public class Poised {
 					System.out.println();
 					
 					keyboard.nextLine();  // Scanner waits for user input
-					System.out.println("Please enter the new deadline for the project(eg. dd-mm-yyyy): ");
+					System.out.println("Please enter the new deadline for the project(eg. yyyy-mm-dd): ");
 					String newDate = keyboard.nextLine();
 					selectedProject.setDeadline(newDate);  // assigning new date to object deadline
 					
+					String updateDeadline = String.format("UPDATE proj_info SET proj_deadline = '%s' WHERE inv_num = '%s'", newDate,
+							projectNum);
+					statement.executeUpdate(updateDeadline);
+					
 					System.out.println(selectedProject.getDeadline());
 				}
-				catch(InputMismatchException e) {
+				catch(InputMismatchException | IndexOutOfBoundsException e) {
 					
 					System.out.println("Error, please try again");
 					
@@ -260,10 +297,14 @@ public class Poised {
 					long newPaidAmmount = onFilePaid + tenderAmmount;
 					selectedProject.setAmmountPaid(newPaidAmmount); // assigning new paid amount to received payment
 					
+					String updatePaidAmmount = String.format("UPDATE invoice SET total_paid = '%s' WHERE inv_num = '%s'", newPaidAmmount,
+							projectNum);
+					statement.executeUpdate(updatePaidAmmount);
+					
 					// Displaying finance info to user
 					System.out.println(selectedProject.getFinances());
 				}
-				catch(InputMismatchException e) {
+				catch(InputMismatchException | IndexOutOfBoundsException e) {
 					
 					System.out.println("Error, please try again.");
 					
@@ -279,18 +320,26 @@ public class Poised {
 					System.out.println("Please enter the name of the new contractor: ");
 					String newName = keyboard.next().trim();
 					selectedProject.contractor.setName(newName);
+					String updateName = String.format("UPDATE contractor SET cont_name = '%s' WHERE proj_num = '%s'", newName, projectNum);
+					statement.executeUpdate(updateName);
 					
 					System.out.println("Please enter the surname of the new contractor: ");
 					String newSurname = keyboard.next().trim();
 					selectedProject.contractor.setSurname(newSurname);
+					String updateSurname = String.format("UPDATE contractor SET cont_surname = '%s' WHERE proj_num = '%s'", newSurname, projectNum);
+					statement.executeUpdate(updateSurname);
 					
 					System.out.println("Please enter their email address: ");
 					String newEmail = keyboard.next().trim();
 					selectedProject.contractor.setEmail(newEmail);
+					String updateEmail = String.format("UPDATE contractor SET cont_email = '%s' WHERE proj_num = '%s'", newEmail, projectNum);
+					statement.executeUpdate(updateEmail);
 					
 					System.out.println("Please enter their cellphone number: ");
 					long newTelNumber = keyboard.nextLong();
 					selectedProject.contractor.setNumber(newTelNumber);
+					String updateTelNum = String.format("UPDATE contractor SET cont_tel = '%s' WHERE proj_num = '%s'", newTelNumber, projectNum);
+					statement.executeUpdate(updateTelNum);
 					
 					System.out.println("Please enter the street number of the building contractor's address");
 					int newStreetNumber = keyboard.nextInt();
@@ -300,8 +349,18 @@ public class Poised {
 					String newStreetName = keyboard.next().trim();
 					selectedProject.contractor.setStreetName(newStreetName);
 					
+					String newContAddress;
+					String newContAddressNumber = String.valueOf(newStreetNumber); // converting integer into string value
+					newContAddress = newContAddressNumber + " " + newStreetName;
+					
+					String updateContAddress = String.format("UPDATE contractor SET cont_address = '%s' WHERE proj_num = '%s'", newContAddress,
+							projectNum);
+					statement.executeUpdate(updateContAddress);
+					
+					getContInfo(statement);
+					
 				}
-				catch(InputMismatchException e) {
+				catch(InputMismatchException | IndexOutOfBoundsException e) {
 					
 					System.out.println("Error, please try again");
 				}
@@ -324,38 +383,46 @@ public class Poised {
 				
 				System.out.print("Please enter the project number of the project you want to finalize: ");
 				int numComplete = keyboard.nextInt();
-				// Opening file to write completed projects to
-				open = new FileWriter("ComplpetedProjects.txt", true);
-				writer = new PrintWriter(open);		               
+		               
 				// Calling on array list method to create list of projects
 				ArrayList<Projects> projectList = Projects.getProjectsArrayList();
 				
 				// Creating project object from user input 
 				Projects completedProject = projectList.get(numComplete - 1);
-										
-				String projectCompleteDate = formattingDate.format(today); // adding completion date to project
+				
+				System.out.println("Please enter the date the project was completed eg.(yyyy-mm-dd):");
+				String projectCompleteDate = keyboard.nextLine(); // adding completion date to project
 				completedProject.setProjectCompleteDate(projectCompleteDate);
+				completedProject.setDeadline(projectCompleteDate);
+				
+				// Updating completion date on database for project
+				String updateComplDate = String.format("UPDATE invoice SET compl_date = '%s' WHERE inv_num = '%s'", projectCompleteDate,
+						numComplete);
+				String updateDeadline = String.format("update proj_info set proj_deadline = '%s' where proj_num = '%s'", projectCompleteDate,
+						numComplete);
+				
+				statement.executeUpdate(updateComplDate);
+				statement.executeUpdate(updateDeadline);
+				
 				// Informing user project marked complete
 				System.out.println(completedProject.toString());
 				System.out.println("Project has been marked complete.");
 				System.out.println();
 				System.out.println(completedProject.getInvoice()); // Generating invoice
-				// Writing project to text file for completed projects
-				writer.write(completedProject.toString());
-				writer.flush();
 					
 				}
 			
-			catch (IOException e) {
+			catch (InputMismatchException e) {
 				
 				System.out.println("Error, please try again.");
 				e.printStackTrace();
 			}         
+		
 		}
 		// Search for project menu by number or by name
 		else if (menuChoice == 4){
 			
-			// While loop for searching for a project, either by name or number
+				// While loop for searching for a project, either by name or number
 				while (find != -1) {
 					System.out.println();
 					System.out.println("Select one of the following options:"
@@ -407,7 +474,7 @@ public class Poised {
 				System.out.print(selectedProject.toString());
 				}
 				// Error handling 
-				catch (IndexOutOfBoundsException e) {
+				catch (IndexOutOfBoundsException | InputMismatchException e) {
 				
 					System.out.println("Project not found, please try again.");
 			}
@@ -424,13 +491,12 @@ public class Poised {
 		}
 			
 		}
-			
 		// View all projects menu                                                          
 			else if (menuChoice == 5){
 			// Creating projects list
-			ArrayList<Projects> searchProject = Projects.getProjectsArrayList();
+			ArrayList<Projects> viewAll = Projects.getProjectsArrayList();
 			// Displaying info
-			System.out.println(searchProject.toString());
+			System.out.println(viewAll.toString());
 			
 		}
 		// View projects that are overdue menu
@@ -439,18 +505,25 @@ public class Poised {
 			ArrayList<Projects> projList = Projects.getProjectsArrayList();
 			// Looping over list to get project dates	
 			for (Projects fileLine : projList) {
-				// Getting project date deadline	
-				String projDate = fileLine.getDeadline();
-				// Changing info from string to type date in order to compare dates
-				Date date;
-				try {
-					date = formattingDate.parse(projDate);
-				// Checking for overdue projects
-				if (date.before(today)) {
+				
+				// Getting project completion date on file
+				String projCompDate = fileLine.getProjectCompleteDate();
+				String datecompl = "To be completed";
 					
-					// Displaying overdue projects
-					System.out.println("Overdue Project:");
-					System.out.println(fileLine.toString());
+				// Getting project date deadline	
+				String projDeadline = fileLine.getDeadline();
+				
+				// Changing info from string to type date in order to compare dates
+				Date dateDeadline;
+				try {
+					dateDeadline = formattingDate.parse(projDeadline);
+					
+				// Checking for overdue projects
+				if (dateDeadline.before(today) && (Objects.equals(projCompDate, datecompl))) {
+					
+						// Displaying overdue projects
+						System.out.println("Overdue Project:");
+						System.out.println(fileLine.toString());
 						
 				}
 			}
@@ -460,6 +533,7 @@ public class Poised {
 			}
 		}
 		}
+
 			// Statement to exit program	
 		else if (menuChoice == -1) {
 			System.out.println("Exiting program, goodbye.");
@@ -476,14 +550,74 @@ public class Poised {
 		}
 		catch (InputMismatchException e){
 		
-			System.out.println("Please enter a correct option and try again. Goodbye");
-		}	
+			System.out.println("Incorrect selection, please try again.");
+		}
+		catch (SQLException e) {
+			
+			System.out.println("Can't connect to the database.");
+			e.printStackTrace();
+		}
+		}
+		catch (SQLException e1) {
+			
+			e1.printStackTrace();
+		}
+
 	}
-}	
+		
+		public static void getCustInfo(Statement statement) throws SQLException{
+			
+			ResultSet results = statement.executeQuery("SELECT cust_surname, cust_name, cust_email, cust_tel, cust_address FROM customer");
+			
+			while (results.next()) {
+				
+				String surname = results.getString("cust_surname");
+				String name = results.getString("cust_name");
+				String email = results.getString("cust_email");
+				long telNumber = results.getLong("cust_tel");
+				String address = results.getString("cust_address");
+				
+				String number1 = address.substring(0, 2);
+				String streetName = address.substring(3);
+				int addressNum = Integer.parseInt(number1);
+				
+				Customer customer1 = new Customer(name, surname, email, telNumber, addressNum, streetName);
+				
+				System.out.println(customer1.toString());
+				
+			}
+		}
+		
+		public static void getContInfo(Statement statement) throws SQLException{
+			
+			ResultSet contractor = statement.executeQuery("SELECT cont_name, cont_surname, cont_email, cont_tel, cont_address FROM proj_info");
+			
+			while (contractor.next()) {
+				
+				String contName = contractor.getString("cont_name");
+				String contSurname = contractor.getString("cont_surname");
+				String contEmail = contractor.getString("cont_email");
+				long contTelNumber = contractor.getLong("cont_tel");
+				String contAddress = contractor.getString("cont_address");
+				
+				String streetNumber = contAddress.substring(0, 2);
+				String streetName = contAddress.substring(3);
+				int addressNum = Integer.parseInt(streetNumber);
+			
+				
+				Contractor contractor1 = new Contractor(contName, contSurname, contEmail, contTelNumber, addressNum, streetName);
+				
+				System.out.println(contractor1.toString());
+			}
+		}
+		
+	}
+	
 // https://www.youtube.com/watch?v=_9BgM9c8mIo, Number format
 // stackoverflow.com/questions/35990394/eclipse-error-cannot-make-a-static-reference-to-a-non-static-field	
 // https://stackoverflow.com/questions/5050170/how-do-i-get-a-date-without-time-in-java	
 // https://stackoverflow.com/questions/7877529/java-string-scanner-input-does-not-wait-for-info-moves-directly-to-next-stateme	
 // https://stackoverflow.com/questions/26448352/counting-the-number-of-lines-in-a-text-file-java
-// https://stackoverflow.com/questions/24816853/comparing-string-date-with-todays-date		
+// https://stackoverflow.com/questions/24816853/comparing-string-date-with-todays-date
+//https://stackoverflow.com/questions/54582495/sql-having-a-primary-key-also-be-a-foreign-key
 
