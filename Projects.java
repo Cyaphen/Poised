@@ -1,16 +1,22 @@
 /**
  * @author jpgeyer
  * Projects class for Poised.java
- * @version 1
+ * @version 2
  * 
  */
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 public class Projects {
 	
@@ -200,6 +206,15 @@ public class Projects {
 	}
 	/**
 	 * 
+	 * @return returns project completion date
+	 */
+	public String getProjectCompleteDate() {
+		
+		return projectCompleteDate;
+		
+	}
+	/**
+	 * 
 	 * @param newDeadline sets projects estimated date of completion
 	 */
 	public void setDeadline(String newDeadline) {
@@ -241,12 +256,11 @@ public class Projects {
 		Scanner keyboard = new Scanner(System.in);
 		NumberFormat currency = NumberFormat.getCurrencyInstance(); // Formatting number to currency
 		
-		DateFormat formattingDate = new SimpleDateFormat("dd/MM/yyyy"); // Formatting date
+		DateFormat formattingDate = new SimpleDateFormat("yyyy-mm-dd"); // Formatting date
 		Date today = new Date();
 		String newDate = formattingDate.format(today);
 		
-		System.out.println("\nPlease enter the invoice number: "); // User input for invoice number
-		int invoiceNum = keyboard.nextInt();
+		int invoiceNum = getProjectNumber();
 		
 		long stillToPay = projectFee - receivedPayment;  // Calculation for outstanding amount on project
 		
@@ -276,52 +290,117 @@ public class Projects {
 		public static ArrayList<Projects> getProjectsArrayList() {
 			// Creating an array list of type Projects to store project info in
 			ArrayList<Projects> projectList = new ArrayList<Projects>();
-			
+						
 			try {
-				// Reading from file with project info in
-				BufferedReader openProject = new BufferedReader(new FileReader("SearchProjects.txt"));
 				
-				String fileLine;
+				// Establishing connection with server and database
+				Connection connection = DriverManager.getConnection(
+						"jdbc:mysql://localhost:3306/poisedpms?useSSL = false",
+						"otheruser",
+						"swordfish"
+						);
 			
-				String[] details = null;
-				// Loop to loop through file and assigning info
-				while ((fileLine = openProject.readLine()) != null) {
+				// Statement variable with direct access to database for running queries
+				Statement statementCust = connection.createStatement();
+				Statement statementArch = connection.createStatement();
+				Statement statementCont = connection.createStatement();
+				Statement statementInfo = connection.createStatement();
+				Statement statementDetails = connection.createStatement();
+				Statement statementInfo1 = connection.createStatement();
+				
+				// SQL statements
+				ResultSet customer = statementCust.executeQuery("SELECT cust_surname, cust_name, cust_email, cust_tel, cust_address FROM customer");
+				ResultSet architect = statementArch.executeQuery("SELECT arch_name, arch_surname, arch_email, arch_tel, arch_address FROM architect");
+				ResultSet contractor = statementCont.executeQuery("SELECT cont_name, cont_surname, cont_email, cont_tel, cont_address FROM contractor");
+				ResultSet projInfo = statementInfo.executeQuery("SELECT proj_num, proj_fee, proj_deadline FROM proj_info");
+				ResultSet projDetails = statementDetails.executeQuery("SELECT proj_address, proj_suburb, proj_name, build_type, erf_num FROM proj_address");
+				ResultSet projInfo1 = statementInfo1.executeQuery("SELECT date_complete, total_paid FROM invoice");
+				
+				// Getting info from database and creating objects
+				while (customer.next() && architect.next() && contractor.next() && projInfo.next() && projDetails.next() && projInfo1.next()) { 
 
-					details = fileLine.split(", ");
-				// Changing info from string to correct type as per constructor to create new project object	
-					int projectNum = Integer.parseInt(details[18]);
-					int streetNum = Integer.parseInt(details[20]);
-					int erfNum = Integer.parseInt(details[23]);
-					long projFee = Long.parseLong(details[24]);
-					long paymentRec = Long.parseLong(details[25]);
-					long telCust = Long.parseLong(details[3]);
-					int streetNumCust = Integer.parseInt(details[4]);
-					long telContractor = Long.parseLong(details[9]);
-					int streetNumContractor = Integer.parseInt(details[10]);
-					long telArchitect = Long.parseLong(details[15]);
-					int streetNumArchitect = Integer.parseInt(details[16]);
 					
-					// Creating new objects of customer, contractor and architect
-					Customer customer1 = new Customer(details[0], details[1], details[2], telCust, streetNumCust,
-							details[5]);
-					Contractor contractor1 = new Contractor(details[6], details[7], details[8], telContractor, streetNumContractor,
-							details[11]);
-					Architect architect1 = new Architect(details[12], details[13], details[14], telArchitect,
-							streetNumArchitect, details[17]);
-					// Creating new project object
-					Projects newProject = new Projects(projectNum, details[27], details[19], streetNum, details[21], details[22],
-							erfNum, projFee, paymentRec, details[26], architect1, contractor1, customer1, details[28]);
+					String custSurname = customer.getString("cust_surname");
+					String custName = customer.getString("cust_name");
+					String custEmail = customer.getString("cust_email");
+					long custTelNumber = customer.getLong("cust_tel");
+					String custAddress = customer.getString("cust_address");
 					
-					// Adding info to array list
-						projectList.add(newProject);
+					// Splitting address to match constructor
+					String custNumber = custAddress.substring(0, 2);
+					String custStreetName = custAddress.substring(3);
+					int custAddressNum = Integer.parseInt(custNumber);
+					
+					Customer customer1 = new Customer(custName, custSurname, custEmail, custTelNumber, custAddressNum, custStreetName);
+
+				// Getting architect info from the database and creating architect object
+					
+					String archName = architect.getString("arch_name");
+					String archSurname = architect.getString("arch_surname");
+					String archEmail = architect.getString("arch_email");
+					long archTelNumber = architect.getLong("arch_tel");
+					String archAddress = architect.getString("arch_address");
+						
+					// Splitting address to match constructor
+					String archNumber = archAddress.substring(0, 2);
+					String archStreetName = archAddress.substring(3);
+					int archAddressNum = Integer.parseInt(archNumber);
+						
+					Architect architect1 = new Architect(archName, archSurname, archEmail, archTelNumber, archAddressNum, archStreetName); 
+
+				// Getting contractor info from database and creating contractor object
+						
+					String contName = contractor.getString("cont_name");
+					String contSurname = contractor.getString("cont_surname");
+					String contEmail = contractor.getString("cont_email");
+					long contTelNumber = contractor.getLong("cont_tel");
+					String contAddress = contractor.getString("cont_address");
+						
+					// Splitting address to match constructor
+					String contNumber = contAddress.substring(0, 2);
+					String contStreetName = contAddress.substring(3);
+					int contAddressNum = Integer.parseInt(contNumber);
+							
+					Contractor contractor1 = new Contractor(contName, contSurname, contEmail, contTelNumber, contAddressNum, contStreetName); 
+
+				// Getting info to create project object
+							
+					int projNum = projInfo.getInt("proj_num");
+					long projFee = projInfo.getLong("proj_fee");
+					String projDeadline = projInfo.getString("proj_deadline");
+									
+					String nameProj = projDetails.getString("proj_name");
+					String buildType = projDetails.getString("build_type");
+					int erfNum = projDetails.getInt("erf_num");
+				
+					String projSuburb = projDetails.getString("proj_suburb");
+					String addressProj = projDetails.getString("proj_address");
+									
+					// Splitting address to match constructor
+					String projStreetNumber = addressProj.substring(0, 2);
+					String projStreetName = addressProj.substring(3);
+					int projAddressNum = Integer.parseInt(projStreetNumber);									
+										
+					String complDate = projInfo1.getString("date_complete");
+					long totalPaid = projInfo1.getLong("total_paid");
+									
+					// Creating project object	
+					Projects newProject = new Projects(projNum, nameProj, buildType, projAddressNum, projStreetName, projSuburb, erfNum,
+							projFee, totalPaid, projDeadline, architect1, contractor1, customer1, complDate);
+									
+					// Adding projects to array list
+					projectList.add(newProject);
+
 				}
 			}				
-					catch (IOException e) {
+					catch (SQLException e) {
 						
 						e.printStackTrace();
+						System.out.println("An error has occured, please try again");
 					}
-			return(projectList);	
-		
+			
+			return(projectList);
+			
 		}
 	}
 	
