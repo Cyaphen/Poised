@@ -1,8 +1,8 @@
 # Poised
 
-#Project Management Program
+# Project Management Program
 
-##Description
+## Description
 
 A project management system for an engineering firm to help them keep track of the projects they are working on.
 The program captures information about new projects, if a project name is not provided
@@ -47,29 +47,29 @@ The program allows the user to see a list of projects that still need to be comp
 are past the due date as well as find and select a project by entering either the project number or project
 name.
 
-##Database
+## Database
 
 A database called PoisePMS has been designed, the program reads and writes data about projects and people associated with
 projects from the database.
 
 ## Program Classes
 
-###Customer Class
+### Customer Class
 
 The customer class is used for all customer related information regarding projects.
 The class has a toString method as well as getters and setters for each of the customer details required for the project.
 
-###Architect Class
+### Architect Class
 
 The architect class is used for all architect related information regarding projects.
 The class has a toString method as well as getters and setters for each of the architect details required for the project.
 
-###Contractor Class
+### Contractor Class
 
 The contractor class is used for all contractor related information regarding projects.
 The class has a toString method as well as getters and setters for each of the contractor details required for the project.
 
-###Project Class
+### Project Class
 
 The project class is used for all information regarding the projects the company is working on.
 In the class attributes it has an attribute of type customer, architect and contractor respectively in order
@@ -84,7 +84,7 @@ for the classes to comunicate and share information.
 		   Array list is used to retrieve information the user is requesting for specific projects,
 		   to search for projects and to view all projects.
  
-###Poised
+### Poised
 
 Where the main menu is displayed for user to perform specific operations.
 * Load a new project
@@ -94,7 +94,7 @@ Where the main menu is displayed for user to perform specific operations.
 * View all projects
 * View projects that are overdue.
 
-##Author
+## Author
 
 **Name:** JP Geyer
 **Email:** jpgeyergit@petalmail.com
