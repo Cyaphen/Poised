@@ -74,7 +74,9 @@ The class has a toString method as well as getters and setters for each of the c
 The project class is used for all information regarding the projects the company is working on.
 In the class attributes it has an attribute of type customer, architect and contractor respectively in order
 for the classes to comunicate and share information.
-**Methods**
+
+### Methods
+
 * Basic getters and setters for information.
 * toString - displays information in easy to read format.
 * Finances - calculates and displays ammount still owed on the project.
