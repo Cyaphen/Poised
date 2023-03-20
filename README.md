@@ -1,7 +1,9 @@
 # Poised
+
 #Project Management Program
 
 ##Description
+
 A project management system for an engineering firm to help them keep track of the projects they are working on.
 The program captures information about new projects, if a project name is not provided
 when the information is captured, the project is named using the surname of
@@ -53,18 +55,22 @@ projects from the database.
 ## Program Classes
 
 ###Customer Class
+
 The customer class is used for all customer related information regarding projects.
 The class has a toString method as well as getters and setters for each of the customer details required for the project.
 
 ###Architect Class
+
 The architect class is used for all architect related information regarding projects.
 The class has a toString method as well as getters and setters for each of the architect details required for the project.
 
 ###Contractor Class
+
 The contractor class is used for all contractor related information regarding projects.
 The class has a toString method as well as getters and setters for each of the contractor details required for the project.
 
 ###Project Class
+
 The project class is used for all information regarding the projects the company is working on.
 In the class attributes it has an attribute of type customer, architect and contractor respectively in order
 for the classes to comunicate and share information.
@@ -79,6 +85,7 @@ for the classes to comunicate and share information.
 		   to search for projects and to view all projects.
  
 ###Poised
+
 Where the main menu is displayed for user to perform specific operations.
 * Load a new project
 * Update project information
@@ -88,6 +95,7 @@ Where the main menu is displayed for user to perform specific operations.
 * View projects that are overdue.
 
 ##Author
+
 **Name:** JP Geyer
 **Email:** jpgeyergit@petalmail.com
 
